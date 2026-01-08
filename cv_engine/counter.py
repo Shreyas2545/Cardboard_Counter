@@ -1,31 +1,44 @@
 import numpy as np
 from scipy.signal import find_peaks
-from utils.config import (
-    FLUTES_PER_SHEET,
-    PEAK_HEIGHT,
-    PEAK_DISTANCE,
-    SMOOTHING_WINDOW
-)
 
-def count_cardboards(signal):
+def estimate_sheet_count_with_confidence(signal):
     """
-    Convert corrugation peaks to actual cardboard sheet count
+    Physics-aware estimation with confidence score.
     """
 
-    # Smooth signal
-    kernel = np.ones(SMOOTHING_WINDOW) / SMOOTHING_WINDOW
-    smooth_signal = np.convolve(signal, kernel, mode="same")
+    smooth = np.convolve(signal, np.ones(7) / 7, mode="same")
 
-    # Detect peaks (corrugation flutes)
     peaks, _ = find_peaks(
-        smooth_signal,
-        height=PEAK_HEIGHT,
-        distance=PEAK_DISTANCE
+        smooth,
+        height=0.15,
+        distance=3
     )
 
-    total_flutes = len(peaks)
+    if len(peaks) < 2:
+        return 1, 0.95
 
-    # Convert flutes → sheets
-    sheet_count = max(1, round(total_flutes / FLUTES_PER_SHEET))
+    spacings = np.diff(peaks)
+    avg_spacing = np.mean(spacings)
+    spacing_std = np.std(spacings)
 
-    return sheet_count, total_flutes
+    stack_thickness = len(signal)
+    raw_estimate = stack_thickness / avg_spacing
+
+    SINGLE_SHEET_THRESHOLD = 30
+
+    if raw_estimate < SINGLE_SHEET_THRESHOLD:
+        final_count = 1
+    else:
+        final_count = int(round(raw_estimate))
+
+    # ---- CONFIDENCE CALCULATION ----
+    # More uniform spacing = higher confidence
+    if avg_spacing == 0:
+        confidence = 0.6
+    else:
+        confidence = 1 - (spacing_std / avg_spacing)
+
+    confidence = max(0.6, min(confidence, 0.98))
+    confidence = round(confidence, 2)
+
+    return final_count, confidence

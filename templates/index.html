@@ -5,12 +5,28 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    <h1>Cardboard Counter</h1>
+
+<div class="container">
+    <h1>📦 Cardboard Counter</h1>
+    <p>Upload an image to count cardboard sheets</p>
 
     <form action="/upload" method="POST" enctype="multipart/form-data">
-        <input type="file" name="image" accept="image/*" required>
+        <input type="file" name="image" accept="image/*" required onchange="previewImage(event)">
         <br><br>
-        <button type="submit">Count Cardboards</button>
+
+        <img id="preview" class="preview-img" style="display:none;">
+
+        <button type="submit">Analyze Image</button>
     </form>
+</div>
+
+<script>
+function previewImage(event) {
+    const img = document.getElementById("preview");
+    img.src = URL.createObjectURL(event.target.files[0]);
+    img.style.display = "block";
+}
+</script>
+
 </body>
 </html>

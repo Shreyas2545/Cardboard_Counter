@@ -1,14 +1,42 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Result</title>
+    <title>Analysis Result</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    <h2>Counting Result</h2>
 
-    <h1>Total Cardboards: {{ count }}</h1>
-    <p>Detected Corrugation Peaks: {{ flutes }}</p>
+<div class="result-page">
+    <div class="result-container">
 
-    <a href="/">Upload another image</a>
+        <h1>📊 Analysis Result</h1>
+
+        <div class="result-content">
+
+            <!-- LEFT: FULL IMAGE -->
+            <div class="image-section-full">
+                <img src="data:image/jpeg;base64,{{ image_data }}" class="result-img-full">
+            </div>
+
+            <!-- RIGHT: DATA -->
+            <div class="data-section">
+                <div class="metric">
+                    <p class="label">Total Cardboards</p>
+                    <p class="value">{{ count }}</p>
+                </div>
+
+                <div class="metric">
+                    <p class="label">Confidence</p>
+                    <p class="confidence">{{ confidence * 100 }}%</p>
+                </div>
+
+                <a href="/" class="link">Analyze another image</a>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
 </body>
 </html>
