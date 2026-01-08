@@ -2,6 +2,8 @@ from flask import Flask, render_template, request
 import numpy as np
 import cv2
 
+from cv_engine.preprocessing import preprocess_image
+
 app = Flask(__name__)
 
 @app.route("/", methods=["GET"])
@@ -18,21 +20,21 @@ def upload():
     if file.filename == "":
         return "No file selected", 400
 
-    # ✅ Read image into memory (NO saving)
+    # Read image in memory
     file_bytes = np.frombuffer(file.read(), np.uint8)
     image = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
 
     if image is None:
         return "Invalid image file", 400
 
-    # ✅ Basic OpenCV processing
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    # ✅ PREPROCESSING STEP
+    processed = preprocess_image(image)
 
-    height, width = gray.shape
+    height, width = processed.shape
 
     return render_template(
         "result.html",
-        message="Image processed successfully!",
+        message="Preprocessing completed successfully!",
         height=height,
         width=width
     )
